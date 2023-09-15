@@ -83,7 +83,7 @@ public enum TargetRenderState implements Predicate<RenderState> {
 	),
 	CLOUDS(
 		MaterialConstants.TARGET_CLOUDS,
-	"clouds",
+		"clouds",
 			() -> {
 				Pipeline.cloudsFbo.bind();
 			},

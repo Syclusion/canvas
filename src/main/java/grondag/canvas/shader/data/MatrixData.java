@@ -47,7 +47,7 @@ public final class MatrixData {
 		// remove this once it stops spitting out the warning
 		if (Float.isNaN(matrix.determinant())) {
 			CanvasMod.LOG.warn("Switching out projection matrix with identity because it's NaN");
-			matrix.setIdentity();
+			matrix.identity();
 		}
 	}
 
@@ -63,6 +63,8 @@ public final class MatrixData {
 			fixVanillaBug(projectionMatrix);
 			sanitizedOnce = true;
 		}
+
+		viewNormalMatrix.set(view.normal());
 
 		((FastMatrix3f) (Object) viewNormalMatrix).f_set((FastMatrix3f) (Object) view.normal());
 

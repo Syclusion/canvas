@@ -53,6 +53,8 @@ import grondag.canvas.apiimpl.rendercontext.CanvasTerrainRenderContext;
 import grondag.canvas.buffer.input.DrawableVertexCollector;
 import grondag.canvas.buffer.input.VertexCollectorList;
 import grondag.canvas.compat.FlywheelHolder;
+import grondag.canvas.light.color.LightDataManager;
+import grondag.canvas.light.color.LightRegionAccess;
 import grondag.canvas.material.state.TerrainRenderStates;
 import grondag.canvas.perf.ChunkRebuildCounters;
 import grondag.canvas.pipeline.Pipeline;
@@ -81,6 +83,7 @@ public class RenderRegion implements TerrainExecutorTask {
 	public final CameraRegionVisibility cameraVisibility;
 	public final ShadowRegionVisibility shadowVisibility;
 	public final NeighborRegions neighbors;
+	private final LightRegionAccess lightRegion;
 
 	private RegionRenderSector renderSector = null;
 
@@ -128,6 +131,7 @@ public class RenderRegion implements TerrainExecutorTask {
 		cameraVisibility = worldRenderState.terrainIterator.cameraVisibility.createRegionState(this);
 		shadowVisibility = worldRenderState.terrainIterator.shadowVisibility.createRegionState(this);
 		origin.update();
+		lightRegion = LightDataManager.allocate(origin);
 	}
 
 	private static <E extends BlockEntity> void addBlockEntity(List<BlockEntity> chunkEntities, Set<BlockEntity> globalEntities, E blockEntity) {
@@ -167,6 +171,10 @@ public class RenderRegion implements TerrainExecutorTask {
 
 			if (renderSector != null) {
 				renderSector = renderSector.release(origin);
+			}
+
+			if (!lightRegion.isClosed()) {
+				LightDataManager.free(origin);
 			}
 		}
 	}
@@ -423,13 +431,14 @@ public class RenderRegion implements TerrainExecutorTask {
 		final RegionOcclusionCalculator occlusionRegion = region.occlusion;
 
 		for (int i = 0; i < RenderRegionStateIndexer.INTERIOR_STATE_COUNT; i++) {
+			final BlockState blockState = region.getLocalBlockState(i);
+			final int x = i & 0xF;
+			final int y = (i >> 4) & 0xF;
+			final int z = (i >> 8) & 0xF;
+			searchPos.set(xOrigin + x, yOrigin + y, zOrigin + z);
+
 			if (occlusionRegion.shouldRender(i)) {
-				final BlockState blockState = region.getLocalBlockState(i);
 				final FluidState fluidState = blockState.getFluidState();
-				final int x = i & 0xF;
-				final int y = (i >> 4) & 0xF;
-				final int z = (i >> 8) & 0xF;
-				searchPos.set(xOrigin + x, yOrigin + y, zOrigin + z);
 
 				final boolean hasFluid = !fluidState.isEmpty();
 				// Vanilla only checks not invisible, but filters non-model shape down the line
@@ -458,6 +467,14 @@ public class RenderRegion implements TerrainExecutorTask {
 					}
 				}
 			}
+
+			if (!lightRegion.isClosed()) {
+				lightRegion.checkBlock(searchPos, blockState);
+			}
+		}
+
+		if (!lightRegion.isClosed()) {
+			lightRegion.submitChecks();
 		}
 
 		buildState.prepareTranslucentIfNeeded(worldRenderState.sectorManager.cameraPos(), renderSector, collectors);

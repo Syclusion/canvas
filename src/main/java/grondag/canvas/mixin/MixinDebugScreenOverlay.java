@@ -42,7 +42,6 @@ import com.mojang.blaze3d.platform.GlUtil;
 
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 //import net.minecraft.client.renderer.GameRenderer;
 
@@ -51,6 +50,7 @@ import grondag.canvas.buffer.input.ArrayVertexCollector;
 import grondag.canvas.buffer.render.TransferBuffers;
 import grondag.canvas.buffer.util.DirectBufferAllocator;
 import grondag.canvas.buffer.util.GlBufferAllocator;
+import grondag.canvas.light.color.LightDataManager;
 import grondag.canvas.render.terrain.cluster.SlabAllocator;
 import grondag.canvas.render.world.CanvasWorldRenderer;
 import grondag.canvas.terrain.util.TerrainExecutor;
@@ -61,7 +61,7 @@ import grondag.canvas.varia.CanvasGlHelper;
 
 // WIP: restore or remove
 @Mixin(DebugScreenOverlay.class)
-public class MixinDebugScreenOverlay extends GuiComponent {
+public class MixinDebugScreenOverlay {
 	//	@Shadow private Font font;
 	//
 	//	private List<String> leftList, rightList;
@@ -218,6 +218,8 @@ public class MixinDebugScreenOverlay extends GuiComponent {
 		result.add("Translucent " + worldRenderState.translucentClusterRealm.debugSummary());
 		result.add(worldRenderState.drawlistDebugSummary());
 		result.add(SlabAllocator.debugSummary());
+
+		result.add(LightDataManager.debugString());
 
 		return result;
 	}

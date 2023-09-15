@@ -25,9 +25,8 @@ import static grondag.canvas.config.ConfigManager.Reload.RELOAD_PIPELINE;
 
 import java.util.List;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
@@ -40,6 +39,7 @@ import grondag.canvas.config.builder.OptionSession;
 import grondag.canvas.config.gui.ActionItem;
 import grondag.canvas.config.gui.BaseScreen;
 import grondag.canvas.config.gui.ListWidget;
+import grondag.canvas.pipeline.Pipeline;
 import grondag.canvas.pipeline.config.PipelineConfig;
 import grondag.canvas.pipeline.config.PipelineConfigBuilder;
 import grondag.canvas.pipeline.config.PipelineLoader;
@@ -117,9 +117,14 @@ public class PipelineOptionScreen extends BaseScreen {
 	}
 
 	private void savePipelineSelection(ResourceLocation newPipelineId) {
+		final var newPipeline = PipelineLoader.get(newPipelineId.toString());
+
+		boolean shadowsChanged = Pipeline.shadowsEnabled() != newPipeline.shadowsEnabled;
+		boolean coloredLightsChanged = Pipeline.coloredLightsEnabled() != newPipeline.coloredLightsEnabled;
+		boolean needRegionsReloaded = (shadowsChanged && !Configurator.advancedTerrainCulling) || coloredLightsChanged;
+
 		Configurator.pipelineId = newPipelineId.toString();
-		// When advanced terrain culling is *soft* disabled, better clear the region storage
-		ConfigManager.saveUserInput(Configurator.advancedTerrainCulling ? RELOAD_PIPELINE : RELOAD_EVERYTHING);
+		ConfigManager.saveUserInput(needRegionsReloaded ? RELOAD_EVERYTHING : RELOAD_PIPELINE);
 	}
 
 	private void save() {
@@ -128,12 +133,12 @@ public class PipelineOptionScreen extends BaseScreen {
 	}
 
 	@Override
-	protected void renderTooltips(PoseStack poseStack, int i, int j) {
+	protected void renderTooltips(GuiGraphics graphics, Font font, int i, int j) {
 		if (list != null) {
 			final List<FormattedCharSequence> tooltip = list.getTooltip(i, j);
 
 			if (tooltip != null) {
-				renderTooltip(poseStack, tooltip, i, j + 30);
+				graphics.renderTooltip(font, tooltip, i, j + 30);
 			}
 		}
 	}

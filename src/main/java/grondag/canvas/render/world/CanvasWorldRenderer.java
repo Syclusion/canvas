@@ -99,6 +99,7 @@ import grondag.canvas.compat.FirstPersonModelHolder;
 import grondag.canvas.compat.PlayerAnimatorHolder;
 import grondag.canvas.config.Configurator;
 import grondag.canvas.config.FlawlessFramesController;
+import grondag.canvas.light.color.LightDataManager;
 import grondag.canvas.material.property.TargetRenderState;
 import grondag.canvas.material.state.RenderContextState;
 import grondag.canvas.material.state.RenderState;
@@ -294,7 +295,7 @@ public class CanvasWorldRenderer extends LevelRenderer {
 		WorldRenderDraws.profileSwap(profiler, ProfilerGroup.StartWorld, "light_update_queue");
 		mc.level.pollLightUpdates();
 		WorldRenderDraws.profileSwap(profiler, ProfilerGroup.StartWorld, "light_updates");
-		mc.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, mc.level.isLightUpdateQueueEmpty(), true);
+		mc.level.getChunkSource().getLightEngine().runLightUpdates();
 
 		WorldRenderDraws.profileSwap(profiler, ProfilerGroup.StartWorld, "clear");
 		Pipeline.defaultFbo.bind();
@@ -374,6 +375,8 @@ public class CanvasWorldRenderer extends LevelRenderer {
 		} else {
 			Lighting.setupLevel(MatrixData.viewMatrix);
 		}
+
+		LightDataManager.update(world);
 
 		WorldRenderDraws.profileSwap(profiler, ProfilerGroup.StartWorld, "before_entities_event");
 
@@ -673,8 +676,7 @@ public class CanvasWorldRenderer extends LevelRenderer {
 		// Stuff here would usually want the render system matrix stack to have the view matrix applied.
 		DebugRenderListener.invoke(eventContext);
 
-		// We still pass in the transformed stack because that is what debug renderer normally gets
-		mc.debugRenderer.render(viewMatrixStack, immediate, frameCameraX, frameCameraY, frameCameraZ);
+		mc.debugRenderer.render(identityStack, immediate, frameCameraX, frameCameraY, frameCameraZ);
 
 		WorldRenderDraws.profileSwap(profiler, ProfilerGroup.EndWorld, "draw_solid");
 

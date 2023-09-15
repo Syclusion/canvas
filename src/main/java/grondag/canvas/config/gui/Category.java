@@ -20,9 +20,8 @@
 
 package grondag.canvas.config.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -57,15 +56,15 @@ class Category extends ListItem {
 		}
 
 		@Override
-		public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 			if (title != NULL_TITLE) {
 				int titleWidth = this.client.font.width(this.title);
-				int titleX = x + (this.getWidth() / 2 - titleWidth / 2);
-				drawString(matrices, this.client.font, this.title, titleX, y, 0xffffffff);
+				int titleX = getX() + (this.getWidth() / 2 - titleWidth / 2);
+				graphics.drawString(this.client.font, this.title, titleX, getY(), 0xffffffff);
 
 				if (this.width > titleWidth) {
-					fill(matrices, x, y + 4, titleX - 5, y + 6, 0x66ffffff);
-					fill(matrices, titleX + titleWidth + 5, y + 4, x + this.getWidth(), y + 6, 0x66ffffff);
+					graphics.fill(getX(), getY() + 4, titleX - 5, getY() + 6, 0x66ffffff);
+					graphics.fill(titleX + titleWidth + 5, getY() + 4, getX() + this.getWidth(), getY() + 6, 0x66ffffff);
 				}
 			}
 		}

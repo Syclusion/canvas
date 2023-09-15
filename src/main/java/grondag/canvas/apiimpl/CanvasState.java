@@ -30,6 +30,7 @@ import grondag.canvas.apiimpl.rendercontext.CanvasBlockRenderContext;
 import grondag.canvas.apiimpl.rendercontext.CanvasEntityBlockRenderContext;
 import grondag.canvas.apiimpl.rendercontext.CanvasItemRenderContext;
 import grondag.canvas.config.Configurator;
+import grondag.canvas.light.color.LightDataManager;
 import grondag.canvas.material.property.TextureMaterialState;
 import grondag.canvas.perf.ChunkRebuildCounters;
 import grondag.canvas.perf.Timekeeper;
@@ -54,6 +55,7 @@ public class CanvasState {
 			CanvasMod.LOG.info(I18n.get("info.canvas.recompile"));
 			PipelineLoader.reload(Minecraft.getInstance().getResourceManager());
 			PipelineManager.reload();
+			LightDataManager.reload();
 			PreReleaseShaderCompat.reload();
 			MaterialProgram.reload();
 			GlShaderManager.INSTANCE.reload();
